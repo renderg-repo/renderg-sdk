@@ -60,4 +60,5 @@ renderg_upload = RendergUpload(**kwargs)
 renderg_upload.upload()
 
 # submit job
-
+submit = api.job.submit_job(job_id)
+print(submit["msg"])
