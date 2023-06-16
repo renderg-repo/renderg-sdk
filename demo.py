@@ -5,6 +5,7 @@ from analyze_houdini import AnalyzeHoudini
 from renderg_api import RenderGAPI
 from renderg_api.constants import TransferLines
 from renderg_api.param_check import RenderGParamChecker
+from renderg_upload.rgUpload import RendergUpload
 
 config = utils.read_json("config.json")
 auth_key = config["AUTH_KEY"]
@@ -44,12 +45,19 @@ render_params = {
 }
 param_check_obj.execute(**render_params)
 
-
 # upload assets
-transfer_config = api.transfer.get_transfer_config(1244788)
-print(transfer_config)
-transfer_lines = api.transfer.get_transfer_line(TransferLines.LINE_RENDERG)
-print(transfer_lines)
+info_path = analyze_obj.info_path
+job_id = analyze_obj.job_id
+
+kwargs = {
+    "api": api,
+    "job_id": job_id,
+    "info_path": info_path,
+    "line": TransferLines.LINE_RENDERG,
+    "spend": 200
+}
+renderg_upload = RendergUpload(**kwargs)
+renderg_upload.upload()
 
 # submit job
 
