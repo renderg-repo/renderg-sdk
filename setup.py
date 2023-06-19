@@ -8,5 +8,7 @@ setup(
     author_email='support@renderg.com',
     description='www.renderg.com',
     packages=find_packages(),    
-    install_requires=[],
+    install_requires=[
+        'requests'
+    ],
 )
