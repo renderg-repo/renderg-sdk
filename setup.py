@@ -13,6 +13,7 @@ setup(
         'tenacity'
     ],
     package_data={
-            'analyze_houdini': ["./houdini/*"],
+        'analyze_houdini': ["./houdini/*"],
+        'ascp': ["*"],
     }
 )

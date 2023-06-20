@@ -1,4 +1,0 @@
-C:/Users/Admin/Downloads/test_output_exr.project
-input/C/Users/Admin/Downloads/test_output_exr.project
-C:/Users/Admin/AppData/Roaming/RGClient/analyze/1245111/info.cfg
-cfg/1245111/info.cfg
