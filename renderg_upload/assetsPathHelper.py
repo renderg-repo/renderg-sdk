@@ -43,18 +43,18 @@ class AssetsPathHelper:
                         AssetsPathHelper.assemble_server_cfg_path(job_id, full_path)
                     )
             elif file_type == 2:
+                if 'info.cfg' in full_path:
+                    has_cfg_file = True
+                    source_paths.append(full_path)
+                    dest_paths.append(
+                        AssetsPathHelper.assemble_server_cfg_path(job_id, full_path)
+                    )
                 if missing == 0:
-                    if 'info.cfg' in full_path:
-                        has_cfg_file = True
-                        source_paths.append(full_path)
-                        dest_paths.append(
-                            AssetsPathHelper.assemble_server_cfg_path(job_id, full_path)
-                        )
-                    else:
-                        local_paths, server_paths = \
-                            AssetsPathHelper.assemble_server_input_path(full_path, remote_name)
-                        source_paths.append(local_paths)
-                        dest_paths.append(server_paths)
+                    local_paths, server_paths = \
+                        AssetsPathHelper.assemble_server_input_path(full_path, remote_name)
+                    source_paths.append(local_paths)
+                    dest_paths.append(server_paths)
+
         if not has_cfg_file and os.path.isfile(info_path):
             source_paths.insert(0, info_path)
             dest_paths.insert(0, AssetsPathHelper.assemble_server_cfg_path(job_id, info_path))
