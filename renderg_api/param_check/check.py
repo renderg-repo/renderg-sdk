@@ -36,7 +36,7 @@ class RenderGParamChecker(object):
                     'ChunkSize': int(kwargs.get("ChunkSize", 1)),  # 一机多帧
                     'ForceRenderFrames': kwargs.get("ForceRenderFrames", ""),  # 帧范围
                     'Mark': kwargs.get("Mark", ""),  # 备注
-                    'PriorityFrames':  kwargs.get("Mark", ""),  # 优先测试帧
+                    'PriorityFrames':  kwargs.get("PriorityFrames", ""),  # 优先测试帧
                     'use_custom_params': 1,
                     'Nodes': self.__get_houdini_render_nodes(nodes),
                     'farm_envs': self.api.env.get_env_info_by_id(self.analyze_obj.env_id),
