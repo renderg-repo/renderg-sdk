@@ -1,6 +1,6 @@
 from renderg_api.connect import Connect
 from renderg_api.constants import ControlType
-from utils import SceneType
+from renderg_utils import SceneType
 
 
 class JobOperator(object):

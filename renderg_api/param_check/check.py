@@ -1,7 +1,7 @@
 import os.path
 
-import utils
-from utils import RenderGException
+import renderg_utils
+from renderg_utils import RenderGException
 
 
 class RenderGParamChecker(object):
@@ -28,9 +28,9 @@ class RenderGParamChecker(object):
 
     def set_custom_params(self, **kwargs):
         custom_params = {}
-        info_data = utils.read_json(self.info_path)
-        scene_type = utils.SceneType.get_scene_file_type(os.path.basename(self.analyze_obj.dcc_file))
-        if scene_type == utils.SceneType.houdini:
+        info_data = renderg_utils.read_json(self.info_path)
+        scene_type = renderg_utils.SceneType.get_scene_file_type(os.path.basename(self.analyze_obj.dcc_file))
+        if scene_type == renderg_utils.SceneType.houdini:
             nodes = info_data.get("Nodes", {})
             custom_params = {
                     'ChunkSize': int(kwargs.get("ChunkSize", 1)),  # 一机多帧
@@ -45,7 +45,7 @@ class RenderGParamChecker(object):
             raise ValueError('"CustomParams" is empty. please set it')
 
         info_data["CustomParams"] = custom_params
-        utils.write_json(self.info_path, info_data)
+        renderg_utils.write_json(self.info_path, info_data)
 
     @staticmethod
     def __get_houdini_render_nodes(nodes):

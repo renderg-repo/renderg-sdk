@@ -1,13 +1,13 @@
 import os
 
-import utils
+import renderg_utils
 from analyze_houdini import AnalyzeHoudini
 from renderg_api import RenderGAPI
 from renderg_api.constants import TransferLines
 from renderg_api.param_check import RenderGParamChecker
 from renderg_upload.rgUpload import RendergUpload
 
-config = utils.read_json("./config.json")
+config = renderg_utils.read_json("./config.json")
 
 api = RenderGAPI(auth_key=config["AUTH_KEY"], cluster_id=config["CLUSTER_ID"])
 

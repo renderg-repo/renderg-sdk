@@ -9,12 +9,12 @@ try:
 except ImportError:
     import winreg
 
-from utils.exception import DCCFileNotExistsError
-from utils.exception import DCCExeNotFoundError
-from utils.exception import AnalyzeFailError
-from utils.exception import ErrorCode, WarnCode
+from renderg_utils.exception import DCCFileNotExistsError
+from renderg_utils.exception import DCCExeNotFoundError
+from renderg_utils.exception import AnalyzeFailError
+from renderg_utils.exception import ErrorCode, WarnCode
 
-import utils
+import renderg_utils
 
 
 class AnalyzeHoudini(object):
@@ -43,7 +43,7 @@ class AnalyzeHoudini(object):
         if not job_id:
             self.job_id = self.api.job.new_job(self.dcc_file, self.project_id, self.env_id)
 
-        self.workspace = os.path.join(utils.get_workspace(workspace), str(self.job_id))
+        self.workspace = os.path.join(renderg_utils.get_workspace(workspace), str(self.job_id))
         if not os.path.isdir(self.workspace):
             os.makedirs(self.workspace)
 
@@ -54,11 +54,11 @@ class AnalyzeHoudini(object):
 
     def add_warning(self, warn, *args):
         self.warning_info.update({warn.code(): warn.msg(*args)})
-        utils.write_json(self.warning_path, self.warning_info)
+        renderg_utils.write_json(self.warning_path, self.warning_info)
 
     def check_file_version(self):
         regex = re.compile(r"set -g _HIP_SAVEVERSION = '(?P<version>.*?)'\s")
-        version = utils.get_dcc_file_version(self.dcc_file, regex)
+        version = renderg_utils.get_dcc_file_version(self.dcc_file, regex)
         if version != self.dcc_version:
             self.add_warning(WarnCode.DCCVersionNotMatchWarn, version, self.dcc_version)
 
@@ -97,7 +97,7 @@ class AnalyzeHoudini(object):
             info_file=self.info_path
         )
         print(cmd)
-        code, std_out, stderr = utils.run_cmd(cmd, shell=True)
+        code, std_out, stderr = renderg_utils.run_cmd(cmd, shell=True)
         if code != 0:
             self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED)
             raise AnalyzeFailError(ErrorCode.AnalyzeFailError, "analyze exits unexpectedly")
