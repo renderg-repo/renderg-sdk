@@ -9,7 +9,7 @@
 2. 安装 renderg-sdk
 
    ```shell
-   pip install git+https://github.com/renderg-repo/renderg-sdk.git
+   pip install renderg-sdk
    ```
 
 3. 创建配置文件 `config.json`
