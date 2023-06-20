@@ -12,4 +12,7 @@ setup(
         'requests',
         'tenacity'
     ],
+    package_data={
+            'analyze_houdini': ["./houdini/*"],
+    }
 )
