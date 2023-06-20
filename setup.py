@@ -9,6 +9,7 @@ setup(
     description='www.renderg.com',
     packages=find_packages(),    
     install_requires=[
-        'requests'
+        'requests',
+        'tenacity'
     ],
 )
