@@ -2,6 +2,7 @@ import os
 import subprocess
 import time
 
+from renderg_api.constants import JobStatus
 from renderg_upload.assetsPathHelper import AssetsPathHelper
 
 
@@ -19,6 +20,7 @@ class RendergUpload:
             self.spend = 1000
 
     def upload(self):
+        self.api.job.update_job_status(self.job_id, JobStatus.STATUS_UPLOAD)
         source_paths,dest_paths = AssetsPathHelper.get_file_list_for_info_cfg(self.info_path,self.job_id)
 
         host, port = self.transfer_lines
