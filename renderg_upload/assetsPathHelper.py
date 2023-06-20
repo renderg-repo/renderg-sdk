@@ -42,7 +42,7 @@ class AssetsPathHelper:
                     dest_paths.append(
                         AssetsPathHelper.assemble_server_cfg_path(job_id, full_path)
                     )
-            elif file_type == 2:
+            elif file_type == 2: 
                 if 'info.cfg' in full_path:
                     has_cfg_file = True
                     source_paths.append(full_path)
