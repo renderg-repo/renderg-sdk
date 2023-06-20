@@ -14,6 +14,6 @@ setup(
     ],
     package_data={
         'analyze_houdini': ["./houdini/*"],
-        'ascp': ["*"],
+        'ascp': ["./bin/*", "./etc/*"],
     }
 )
