@@ -97,7 +97,7 @@ class AnalyzeHoudini(object):
             info_file=self.info_path
         )
         print(cmd)
-        code, std_out, stderr = renderg_utils.run_cmd(cmd, shell=True)
+        code = renderg_utils.run_cmd(cmd, shell=True)
         if code != 0:
             self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED)
             raise AnalyzeFailError(ErrorCode.AnalyzeFailError, "analyze exits unexpectedly")

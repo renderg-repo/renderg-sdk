@@ -34,10 +34,9 @@ def run_cmd(cmd, shell=False):
         cmd = str(cmd).encode(sys.getfilesystemencoding())
 
     popen = subprocess.Popen(cmd, stderr=subprocess.PIPE, shell=shell)
+    popen.wait()
 
-    stdout, stderr = popen.communicate()
-
-    return popen.returncode, stdout, stderr
+    return popen.returncode
 
 
 def get_dcc_file_version(file_path, regex):
