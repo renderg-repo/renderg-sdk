@@ -51,11 +51,9 @@ api = RenderGAPI(auth_key=config["AUTH_KEY"], cluster_id=config["CLUSTER_ID"])
 analyze_info = {
     "dcc_file": r"D:\houdini_file\JSBL_lgt_qunji_wmy_v001.hip",
     "dcc_version": "19.0.622",
-    "workspace": r"D:\workspace",  # 工作目录，存放日志、分析结果等文件。默认为 %USERPROFILE%\RenderG_WorkSpace
     "api": api,
     "project_id": config["PROJECT_ID"],  # 项目ID
-    "env_id": config["ENV_ID"],  # 环境ID
-    "job_id": None,  # 任务号为空时，自动创建任务号
+    "env_id": config["ENV_ID"]  # 环境ID
 }
 # 3. 分析资产列表和场景渲染参数
 analyze_obj = AnalyzeHoudini(**analyze_info)
