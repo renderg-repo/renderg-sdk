@@ -5,10 +5,11 @@ import time
 from renderg_api.constants import JobStatus
 from renderg_upload.assetsPathHelper import AssetsPathHelper
 
+import renderg_utils
 
 class RendergUpload:
 
-    def __init__(self,api,job_id,info_path,line,spend):
+    def __init__(self,api,job_id,info_path,line,spend,workspace=None):
         self.api = api
         self.transfer_config = api.transfer.get_transfer_config(job_id)
         self.transfer_lines = api.transfer.get_transfer_line(line)
@@ -18,6 +19,13 @@ class RendergUpload:
             self.spend = spend
         else:
             self.spend = 1000
+        self.workspace = os.path.join(renderg_utils.get_workspace(workspace), str(self.job_id))
+        if not os.path.isdir(self.workspace):
+            os.makedirs(self.workspace)
+        self.log_path = os.path.join(renderg_utils.get_workspace(workspace), 'log')
+        if not os.path.isdir(self.log_path):
+            os.makedirs(self.log_path)
+
 
     def upload(self):
         self.api.job.update_job_status(self.job_id, JobStatus.STATUS_UPLOAD)
@@ -28,13 +36,11 @@ class RendergUpload:
         password = self.transfer_config.get("password")
 
         root_dir = AssetsPathHelper.get_root_dir()
-        ascp_dir = f"{root_dir}/ascp/bin/ascp.exe".replace('\\', '/')
+        ascp_dir = f"{root_dir}/ascp/bin/ascp.exe"
         timestamp = time.time()
 
         formatted_time = time.strftime('%Y%m%d%H%M%S', time.localtime(timestamp))
-        workspace = self.info_path.replace('info.cfg', '')
-        filepairlist_dir = os.path.join(workspace, f'{self.job_id}_{formatted_time}.txt')
-        print(filepairlist_dir)
+        filepairlist_dir = os.path.join(self.workspace, f'{self.job_id}_{formatted_time}.txt')
 
         with open(filepairlist_dir, 'w') as f:
             for index, source in enumerate(source_paths, 0):
@@ -45,8 +51,8 @@ class RendergUpload:
                 f.write(f"{dest}\n")
 
         cmd_pass = f"set ASPERA_SCP_PASS={password}"
-        cmd = f'{cmd_pass}&& {ascp_dir} -P {port} -O {port} -T -l{self.spend}m --mode=send -k2 --overwrite=diff --user={username} -d --host={host} -L {workspace} --file-pair-list={filepairlist_dir} .'
-
+        cmd = f'{cmd_pass}&& {ascp_dir} -P {port} -O {port} -T -l{self.spend}m --mode=send -k2 --overwrite=diff --user={username} -d --host={host} -L {self.log_path} --file-pair-list={filepairlist_dir} .'
+        print(cmd)
         try:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             while True:
