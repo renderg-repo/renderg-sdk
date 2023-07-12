@@ -31,10 +31,10 @@ class RendergUpload:
         ascp_dir = f"{root_dir}/ascp/bin/ascp.exe".replace('\\', '/')
         timestamp = time.time()
 
-        log_path = f'{os.getcwd()[:2]}/log/'
         formatted_time = time.strftime('%Y%m%d%H%M%S', time.localtime(timestamp))
-        filepairlist_dir = f"{log_path}/{self.job_id}_{formatted_time}.txt".replace('\\', '/')
-        os.makedirs(os.path.dirname(filepairlist_dir), exist_ok=True)
+        workspace = self.info_path.replace('info.cfg', '')
+        filepairlist_dir = os.path.join(workspace, f'{self.job_id}_{formatted_time}.txt')
+        print(filepairlist_dir)
 
         with open(filepairlist_dir, 'w') as f:
             for index, source in enumerate(source_paths, 0):
@@ -45,7 +45,7 @@ class RendergUpload:
                 f.write(f"{dest}\n")
 
         cmd_pass = f"set ASPERA_SCP_PASS={password}"
-        cmd = f'{cmd_pass}&& {ascp_dir} -P {port} -O {port} -T -l{self.spend}m --mode=send -k2 --overwrite=diff --user={username} -d --host={host} -L {log_path} --file-pair-list={filepairlist_dir} .'
+        cmd = f'{cmd_pass}&& {ascp_dir} -P {port} -O {port} -T -l{self.spend}m --mode=send -k2 --overwrite=diff --user={username} -d --host={host} -L {workspace} --file-pair-list={filepairlist_dir} .'
 
         try:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
