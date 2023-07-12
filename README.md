@@ -70,6 +70,11 @@ render_params = {
     "zone_id": config["ZONE_ID"],  # CPU 配置信息
     "ram_limit": config["RAM_LIMIT"],  # 内存配置
 }
+param_check_obj.set_houdini_render_node({
+    "/node/path/to/render": "1001-1100",
+    "/node/path/to/render/1": "100-1100",
+})
+
 param_check_obj.execute(**render_params)
 
 # ========上传任务并提交==========

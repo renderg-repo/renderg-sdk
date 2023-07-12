@@ -5,6 +5,7 @@ from renderg_utils import RenderGException
 
 
 class RenderGParamChecker(object):
+    render_nodes = dict()
 
     def __init__(self, api, analyze_obj):
         self.api = api
@@ -12,6 +13,23 @@ class RenderGParamChecker(object):
 
         self.info_path = self.analyze_obj.info_path
         self.warning_path = self.analyze_obj.warning_path
+
+    def set_houdini_render_node(self, nodes):
+        info_data = renderg_utils.read_json(self.info_path)
+        info_nodes = info_data.get("Nodes", {})
+        render_nodes = dict()
+        for node, frame in nodes.items():
+            if node in info_nodes:
+                render_nodes[node] = {
+                    "Frames": frame
+                }
+            else:
+                raise KeyError("Node {} Not Found.".format(node))
+        self.render_nodes = render_nodes
+        custom_params = info_data.get("CustomParams", {})
+        custom_params.update({"Nodes": render_nodes})
+        info_data["CustomParams"] = custom_params
+        renderg_utils.write_json(self.info_path, info_data)
 
     def execute(self, info_path=None, **kwargs):
         if info_path and os.path.isfile(info_path):
@@ -38,7 +56,7 @@ class RenderGParamChecker(object):
                     'Mark': kwargs.get("Mark", ""),  # 备注
                     'PriorityFrames':  kwargs.get("PriorityFrames", ""),  # 优先测试帧
                     'use_custom_params': 1,
-                    'Nodes': self.__get_houdini_render_nodes(nodes),
+                    'Nodes': self.render_nodes or self.__get_houdini_render_nodes(nodes),
                     'farm_envs': self.api.env.get_env_info_by_id(self.analyze_obj.env_id),
             }
         if not custom_params:
