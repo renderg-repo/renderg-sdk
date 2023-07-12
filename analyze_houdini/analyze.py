@@ -83,20 +83,14 @@ class AnalyzeHoudini(object):
 
         return dcc_exe_path
 
-    def analyze(self):
+    def analyze(self, cmd=None):
         self.check_file_version()
         if not self.dcc_exe_path:
             self.dcc_exe_path = self.find_dcc_exe()
 
         self._update_analyze_status(JobStatus.STATUS_ANALYZE_DOING)
         script_path = os.path.join(os.path.dirname(__file__), "houdini/run.py")
-        cmd = '"{exe_path}" "{script_path}" -input "{dcc_file}" -output "{info_file}"'.format(
-            exe_path=self.dcc_exe_path,
-            script_path=script_path,
-            dcc_file=self.dcc_file,
-            info_file=self.info_path
-        )
-        print(cmd)
+        cmd = cmd or [self.dcc_exe_path, script_path, "-input", self.dcc_file, "-output", self.info_path]
         code = renderg_utils.run_cmd(cmd, shell=True)
         if code != 0:
             self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED)
