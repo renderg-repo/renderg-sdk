@@ -53,7 +53,7 @@ class Connect(object):
 
     @retry(reraise=True, stop=stop_after_attempt(5),
            wait=wait_random(min=1, max=2))
-    def get(self, api_url, data=None, validator=True):
+    def get(self, api_url, data=None, validator=True, num=None):
         if not data:
             data = {}
 
@@ -62,7 +62,8 @@ class Connect(object):
             pass
 
         request_url = assemble_api_url(self.domain, api_url, self._protocol)
-
+        if '{}' in request_url:
+            request_url = request_url.replace('{}', num)
         response = self._session.get(request_url, params=data, headers=self._headers)
         response_json = response.json()
         if not response.ok:

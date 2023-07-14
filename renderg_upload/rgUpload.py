@@ -7,6 +7,7 @@ from renderg_upload.assetsPathHelper import AssetsPathHelper
 
 import renderg_utils
 
+
 class RendergUpload:
 
     def __init__(self,api,job_id,info_path,line,spend,workspace=None):
