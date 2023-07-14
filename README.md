@@ -41,6 +41,7 @@ from renderg_api import RenderGAPI
 from renderg_api.constants import TransferLines
 from renderg_api.param_check import RenderGParamChecker
 from renderg_upload.rgUpload import RendergUpload
+from renderg_upload.rgDownload import RendergDownload
 # ========分析资产和渲染参数==========
 # 1. 读取配置文件
 config = utils.read_json("./config.json")
@@ -98,6 +99,34 @@ renderg_upload.upload()
 submit = api.job.submit_job(job_id)
 print(submit["msg"])
 
+# 5. 下载
+# 等待任务完成下载
+ download_kwargs = {
+     "api": api,
+     "job_id": job_id,
+     "download_path": "d:/test", # 下载保存到本地路径
+     "line": TransferLines.LINE_RENDERG,
+     "cluster_id": config["CLUSTER_ID"],
+     "spend": 3000 # 上传速度限制，单位为 Mbps
+ }
+ renderg_sync = RendergDownload(**download_kwargs)
+ result = renderg_sync.download()
+ print(result)
+
+ # 自定义下载
+download_others_json = {
+    "api": api,
+    "job_id": None,
+    "download_path": "d:/test", # 下载保存到本地路径
+    "line": TransferLines.LINE_RENDERG,
+    "cluster_id": config["CLUSTER_ID"],
+    "spend": 3000 # 上传速度限制，单位为 Mbps
+}
+server_path = {
+    f"/{job_id}/files.txt"
+} # 提供待下载目录列表
+renderg_sync = RendergDownload(**download_others_json)
+renderg_sync.custom_download(server_path)
 ```
 
 
