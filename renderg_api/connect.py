@@ -32,7 +32,7 @@ class Connect(object):
 
     @retry(reraise=True, stop=stop_after_attempt(5),
            wait=wait_random(min=1, max=2))
-    def post(self, api_url, data=None, validator=True):
+    def post(self, api_url, data=None, params=None, validator=True):
         if not data:
             data = {}
 
@@ -43,8 +43,9 @@ class Connect(object):
         request_url = assemble_api_url(self.domain, api_url, self._protocol)
         data = json.dumps(data)
 
-        response = self._session.post(request_url, data, headers=self._headers)
+        response = self._session.post(request_url, data=data, headers=self._headers, params=params)
         response_json = response.json()
+
         if not response.ok:
             response_code = response_json.get('error_code')
             raise RenderGAPIError(response_code, response_json.get("msg", ""), response.url)
@@ -53,7 +54,7 @@ class Connect(object):
 
     @retry(reraise=True, stop=stop_after_attempt(5),
            wait=wait_random(min=1, max=2))
-    def get(self, api_url, data=None, validator=True):
+    def get(self, api_url, data=None, params=None, validator=True):
         if not data:
             data = {}
 
@@ -62,9 +63,11 @@ class Connect(object):
             pass
 
         request_url = assemble_api_url(self.domain, api_url, self._protocol)
+        data = json.dumps(data)
 
-        response = self._session.get(request_url, params=data, headers=self._headers)
+        response = self._session.get(request_url, data=data, headers=self._headers, params=params)
         response_json = response.json()
+
         if not response.ok:
             response_code = response_json.get('error_code')
             raise RenderGAPIError(response_code, response_json.get("msg", ""), response.url)
