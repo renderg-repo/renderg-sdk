@@ -20,6 +20,7 @@ class ApiUrl(str, Enum):
     GetZoneList = "/api/v1/front/zone/list"
 
     GetEnvList = "/api/v1/front/environment/list"
+    GetProjectList = "/api/v2/front/project/all"
 
     GetTransferLine = "/api/v1/front/transfer/lines"
     GetTransferConfig = "/api/v1/front/job/transfer_plus"
