@@ -3,7 +3,7 @@ import os
 from renderg_api.connect import Connect
 from renderg_api.operators import UserOperator, TaskOperator, JobOperator, ProjectOperator, EnvOperator, \
     TransferOperator
-from renderg_upload import MqttClient,MqConnet
+from renderg_api.mqConnect import MqConnect
 
 
 class RenderGAPI(object):
@@ -24,7 +24,7 @@ class RenderGAPI(object):
         self.project = ProjectOperator(self._connect)
         self.env = EnvOperator(self._connect)
         self.transfer = TransferOperator(self._connect)
-        self.mqConnect = MqConnet(auth_key)
+        self.mqConnect = MqConnect(auth_key)
 
     def generate_job(self, dcc_file_path, project_name=None, env_name=None):
         pass
