@@ -22,7 +22,8 @@ setup(
     packages=find_packages(),    
     install_requires=[
         'requests',
-        'tenacity'
+        'tenacity',
+        'paho-mqtt'
     ],
     package_data={
         'analyze_houdini': ["./houdini/*"],

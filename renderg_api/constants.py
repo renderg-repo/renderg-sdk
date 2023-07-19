@@ -25,4 +25,5 @@ class JobStatus:
     STATUS_ANALYZED = '10031'
     STATUS_UPLOAD = '10032'
     STATUS_ANALYZE_DOING = '10039'
+    STATUS_COMPLETED = 'Completed'
 

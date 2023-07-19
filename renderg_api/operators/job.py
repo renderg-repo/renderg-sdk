@@ -66,3 +66,6 @@ class JobOperator(object):
             'submit_version': "2"
         }
         return self._connect.post(self._connect.urls.SubmitJob, params)
+
+    def get_jobs_info(self, job_id):
+        return self._connect.get(self._connect.urls.JobInfo,None,True,str(job_id))

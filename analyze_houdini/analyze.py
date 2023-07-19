@@ -44,8 +44,7 @@ class AnalyzeHoudini(object):
             self.job_id = self.api.job.new_job(self.dcc_file, self.project_id, self.env_id)
 
         self.workspace = os.path.join(renderg_utils.get_workspace(workspace), str(self.job_id))
-        if not os.path.isdir(self.workspace):
-            os.makedirs(self.workspace)
+        renderg_utils.check_path(self.workspace)
 
         self.info_path = os.path.join(self.workspace, "info.cfg")
         self.warning_path = os.path.join(self.workspace, "warning.json")
@@ -79,7 +78,7 @@ class AnalyzeHoudini(object):
             except BaseException as err:
                 print(err.__str__())
         if not dcc_exe_path or not os.path.isfile(dcc_exe_path):
-            raise DCCExeNotFoundError(ErrorCode.DCCExeNotFoundError, dcc_exe_path)
+            raise DCCExeNotFoundError(ErrorCode.DCCExeNotFoundError, self.dcc_version)
 
         return dcc_exe_path
 
@@ -91,10 +90,10 @@ class AnalyzeHoudini(object):
         self._update_analyze_status(JobStatus.STATUS_ANALYZE_DOING)
         script_path = os.path.join(os.path.dirname(__file__), "houdini/run.py")
         cmd = cmd or [self.dcc_exe_path, script_path, "-input", self.dcc_file, "-output", self.info_path]
-        code = renderg_utils.run_cmd(cmd, shell=True)
+        code, stderr = renderg_utils.run_cmd(cmd, shell=True)
         if code != 0:
             self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED)
-            raise AnalyzeFailError(ErrorCode.AnalyzeFailError, "analyze exits unexpectedly")
+            raise AnalyzeFailError(ErrorCode.AnalyzeFailError, stderr.read() or "analyze exits unexpectedly")
 
         if not os.path.isfile(self.info_path):
             self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED)

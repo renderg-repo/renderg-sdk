@@ -40,7 +40,9 @@ from analyze_houdini import AnalyzeHoudini
 from renderg_api import RenderGAPI
 from renderg_api.constants import TransferLines
 from renderg_api.param_check import RenderGParamChecker
-from renderg_upload.rgUpload import RendergUpload
+from renderg_transfer.RGUpload import RenderGUpload
+from renderg_transfer.RGDownload import RenderGDownload
+
 # ========分析资产和渲染参数==========
 # 1. 读取配置文件
 config = utils.read_json("./config.json")
@@ -88,16 +90,45 @@ upload_kwargs = {
     "job_id": job_id,
     "info_path": info_path,
     "line": TransferLines.LINE_RENDERG,
-    "spend": 200 # 上传速度限制，单位为 Mbps
+    "speed": 200  # 上传速度限制，单位为 Mbps
 }
 # 3. 开始上传
-renderg_upload = RendergUpload(**upload_kwargs)
+renderg_upload = RenderGUpload(**upload_kwargs)
 renderg_upload.upload()
 
 # 4. 上传完成，提交任务，开始渲染
 submit = api.job.submit_job(job_id)
 print(submit["msg"])
 
+# 5. 下载
+# 等待任务完成下载
+download_kwargs = {
+    "api": api,
+    "job_id": job_id,
+    "download_path": "d:/test",  # 下载保存到本地路径
+    "line": TransferLines.LINE_RENDERG,
+    "cluster_id": config["CLUSTER_ID"],
+    "speed": 500  # 上传速度限制，单位为 Mbps
+}
+renderg_sync = RenderGDownload(**download_kwargs)
+result = renderg_sync.auto_download_after_job_completed()
+
+'''
+# 自定义下载
+download_others_json = {
+    "api": api,
+    "job_id": None,
+    "download_path": "d:/test",  # 下载保存到本地路径
+    "line": TransferLines.LINE_RENDERG,
+    "cluster_id": config["CLUSTER_ID"],
+    "speed": 3000  # 上传速度限制，单位为 Mbps
+}
+server_path = {
+    "/{job_id}".format(job_id=job_id)
+}  # 提供待下载目录列表
+renderg_sync = RenderGDownload(**download_others_json)
+renderg_sync.custom_download(server_path)
+'''
 ```
 
 

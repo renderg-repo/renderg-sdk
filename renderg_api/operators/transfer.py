@@ -27,3 +27,8 @@ class TransferOperator(object):
     def get_transfer_config(self, job_id):
         params = {'job_id': str(job_id)}
         return self._connect.post(self._connect.urls.GetTransferConfig, params).get('data')
+
+    def get_transfer_cluster(self, cluster_id):
+        params = {'cluster_id': str(cluster_id)}
+        data = self._connect.post(self._connect.urls.GetTransferByCluster, params).get('data')
+        return data
