@@ -4,6 +4,8 @@ import json
 import re
 import time
 
+import renderg_utils
+
 
 class TransferConstants:
 
@@ -68,26 +70,31 @@ class TransferHelper:
         return executable
 
     @classmethod
-    def create_file_pair_list_file(cls, workspace, job_id, source_paths, dest_paths):
+    def create_file_pair_list_file(cls, workspace, source_paths, dest_paths):
         timestamp = time.time()
         formatted_time = time.strftime('%Y%m%d%H%M%S', time.localtime(timestamp))
         file_path = os.path.join(
-            workspace, job_id if not job_id else "temp", 'transfer_files_{}.txt'.format(formatted_time)
+            workspace, "temp", 'transfer_files_{}.txt'.format(formatted_time)
         )
+        renderg_utils.check_path(os.path.dirname(file_path))
+
+        flist = [path for pair in zip(source_paths, dest_paths) for path in pair]
         with open(file_path, 'wb') as pf:
-            pf.write('\n'.join(source_paths).encode('utf-8'))
-            pf.write('\n'.join(dest_paths).encode('utf-8'))
+            pf.write('\n'.join(flist).encode('utf-8'))
+            pf.write('\n'.encode('utf-8'))
         return file_path
 
     @classmethod
     def create_ascp_command(cls, cmd_pass, mode, host, port, username,
-                            max_speed=1000, log_dir="", pair_list_file="", source_path=None, dest_path=None):
+                            resume_check="2", max_speed=1000, log_dir="", pair_list_file="",
+                            source_path=None, dest_path=None):
         ascp_executable = cls.get_ascp_executable()
 
         cmd = ('{cmd_pass}&& {ascp_dir} -P {port} -O {port} -T -l{speed}m --mode={mode} '
-               '-k2 --overwrite=diff --user={username} -d --host={host} -Efiles.txt').format(
+               '-k{resume_check} --policy=fair --overwrite=diff --user={username} -d --host={host} '
+               '-Efiles.txt').format(
                 username=username, cmd_pass=cmd_pass, ascp_dir=ascp_executable,
-                host=host, port=port, speed=max_speed, mode=mode)
+                host=host, port=port, speed=max_speed, mode=mode, resume_check=resume_check)
         if log_dir:
             cmd += " -L {log_path}".format(log_path=log_dir)
 

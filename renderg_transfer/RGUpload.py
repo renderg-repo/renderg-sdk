@@ -21,11 +21,9 @@ class RenderGUpload:
         else:
             self.speed = 1000
         self.workspace = os.path.join(renderg_utils.get_workspace(workspace), str(self.job_id))
-        if not os.path.isdir(self.workspace):
-            os.makedirs(self.workspace)
         self.log_path = os.path.join(renderg_utils.get_workspace(workspace), 'log')
-        if not os.path.isdir(self.log_path):
-            os.makedirs(self.log_path)
+        renderg_utils.check_path(self.workspace)
+        renderg_utils.check_path(self.log_path)
 
     def upload(self):
         self.api.job.update_job_status(self.job_id, JobStatus.STATUS_UPLOAD)
@@ -36,7 +34,7 @@ class RenderGUpload:
         password = self.transfer_config.get("password")
 
         file_pair_list_path = TransferHelper.create_file_pair_list_file(
-            self.workspace, self.job_id, source_paths, dest_paths
+            self.workspace, source_paths, dest_paths
         )
 
         cmd_pass = "set ASPERA_SCP_PASS={password}".format(password=password)
@@ -51,5 +49,7 @@ class RenderGUpload:
             pair_list_file=file_pair_list_path
         )
         print(cmd)
-        code = renderg_utils.run_cmd(cmd, shell=True)
+        code, stderr = renderg_utils.run_cmd(cmd, shell=True)
         print("cmd return code: {}".format(code))
+        if code != 0:
+            raise Exception("{} 上传失败。 error={}".format(self.job_id, stderr))

@@ -25,12 +25,10 @@ class RenderGDownload:
         self.speed = speed
 
         self.workspace = renderg_utils.get_workspace(workspace)
-        if not os.path.isdir(self.workspace):
-            os.makedirs(self.workspace)
-
         self.log_path = os.path.join(self.workspace, 'log')
-        if not os.path.isdir(self.log_path):
-            os.makedirs(self.log_path)
+
+        renderg_utils.check_path(self.workspace)
+        renderg_utils.check_path(self.log_path)
 
         auth_key = self.api.mqConnect.get_key()
         self.mqtt_client = MqttClient('{}_sdk'.format(self.user_id), auth_key)
@@ -49,19 +47,20 @@ class RenderGDownload:
         status = job_info.get('Status')
         if status != JobStatus.STATUS_COMPLETED:
             # 任务未完成，监听mqtt状态，等待完成
+            print("{} 任务未完成，等待渲染完成后下载···".format(self.job_id))
             self.mqtt_client.subscribe(
                 'mqtt/front/user/{user_id}/{job_id}'.format(user_id=self.user_id, job_id=self.job_id),
                 self.mq_callback
             )
             while True:
-                print("监听任务 {job_id}".format(job_id=self.job_id))
                 if str(self.job_id) in self.jobEnd_list:
-                    print("{job_id}:渲染完成".format(job_id=self.job_id))
                     self.mqtt_client.unsubscribe(
                         'mqtt/front/user/{user_id}/{job_id}'.format(user_id=self.user_id, job_id=self.job_id)
                     )
                     break
                 time.sleep(3)
+
+        print("{job_id}:渲染完成。开始下载".format(job_id=self.job_id))
 
         username = self.transfer_config.get("output_username")
         password = self.transfer_config.get("password")
@@ -82,9 +81,10 @@ class RenderGDownload:
             dest_path=files_dest_path
         )
         print(cmd)
-        code = renderg_utils.run_cmd(cmd, shell=True)
+        code, stderr = renderg_utils.run_cmd(cmd, shell=True)
         print("cmd return code: {}".format(code))
-        return "success"
+        if code != 0:
+            raise Exception("{} 下载失败。error={}".format(self.job_id, stderr))
 
     def custom_download(self, server_path):
         username = self.transfer_config.get("output_username")
@@ -97,7 +97,7 @@ class RenderGDownload:
             dest_paths.append("{}/{}".format(self.download_path, source))
 
         file_pair_list_path = TransferHelper.create_file_pair_list_file(
-            self.workspace, self.job_id, source_paths, dest_paths
+            self.workspace, source_paths, dest_paths
         )
 
         # 下载：
@@ -114,5 +114,7 @@ class RenderGDownload:
             pair_list_file=file_pair_list_path
         )
         print(cmd)
-        code = renderg_utils.run_cmd(cmd, shell=True)
+        code, stderr = renderg_utils.run_cmd(cmd, shell=True)
         print("cmd return code: {}".format(code))
+        if code != 0:
+            raise Exception("{} 下载失败。error={}".format(self.job_id, stderr))

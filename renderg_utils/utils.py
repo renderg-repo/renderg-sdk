@@ -29,6 +29,17 @@ def write_json(file_path, data, encoding="utf-8", ensure_ascii=True):
             f.write(str(json.dumps(data, ensure_ascii=ensure_ascii, indent=4)))
 
 
+def check_path(path):
+    """
+    check the system path, create path if it's not exists
+
+    :param path: a system path
+    :return: None
+    """
+    if not os.path.isdir(path):
+        os.makedirs(path)
+
+
 def run_cmd(cmd, shell=False):
     if PY_VERSION == 2:
         cmd = str(cmd).encode(sys.getfilesystemencoding())
@@ -36,7 +47,7 @@ def run_cmd(cmd, shell=False):
     popen = subprocess.Popen(cmd, stderr=subprocess.PIPE, shell=shell)
     popen.wait()
 
-    return popen.returncode
+    return popen.returncode, popen.stderr
 
 
 def get_dcc_file_version(file_path, regex):

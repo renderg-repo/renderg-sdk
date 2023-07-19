@@ -90,7 +90,7 @@ upload_kwargs = {
     "job_id": job_id,
     "info_path": info_path,
     "line": TransferLines.LINE_RENDERG,
-    "spend": 200  # 上传速度限制，单位为 Mbps
+    "speed": 200  # 上传速度限制，单位为 Mbps
 }
 # 3. 开始上传
 renderg_upload = RenderGUpload(**upload_kwargs)
@@ -108,12 +108,12 @@ download_kwargs = {
     "download_path": "d:/test",  # 下载保存到本地路径
     "line": TransferLines.LINE_RENDERG,
     "cluster_id": config["CLUSTER_ID"],
-    "spend": 3000  # 上传速度限制，单位为 Mbps
+    "speed": 500  # 上传速度限制，单位为 Mbps
 }
 renderg_sync = RenderGDownload(**download_kwargs)
 result = renderg_sync.auto_download_after_job_completed()
-print(result)
 
+'''
 # 自定义下载
 download_others_json = {
     "api": api,
@@ -121,13 +121,14 @@ download_others_json = {
     "download_path": "d:/test",  # 下载保存到本地路径
     "line": TransferLines.LINE_RENDERG,
     "cluster_id": config["CLUSTER_ID"],
-    "spend": 3000  # 上传速度限制，单位为 Mbps
+    "speed": 3000  # 上传速度限制，单位为 Mbps
 }
 server_path = {
     "/{job_id}".format(job_id=job_id)
 }  # 提供待下载目录列表
 renderg_sync = RenderGDownload(**download_others_json)
 renderg_sync.custom_download(server_path)
+'''
 ```
 
 
