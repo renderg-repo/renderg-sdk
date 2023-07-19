@@ -25,4 +25,4 @@ class ApiUrl(str, Enum):
     GetTransferLine = "/api/v1/front/transfer/lines"
     GetTransferConfig = "/api/v1/front/job/transfer_plus"
     GetTransferByCluster = "/api/v1/front/transfer/transfer_plus"
-    JobInfo = "/api/v1/front/job/{}"
+    JobInfo = "/api/v1/front/job/"
