@@ -1,6 +1,6 @@
 from renderg_api.connect import Connect
 from renderg_api.constants import ControlType
-from renderg_utils import SceneType
+from renderg_utils import *
 
 
 class JobOperator(object):
@@ -16,6 +16,13 @@ class JobOperator(object):
             'env_id': env_id,
             'submit_type': 902,
             'transport': '2',
+
+            # other msg
+            'client_version': get_version(),
+            'client_address': get_pc_ip(),
+            'os': get_pc_version(),
+            'mac': get_mac_address(),
+            'submit_user': get_pc_name()
         }
         response = self._connect.post(self._connect.urls.NewJob, params)
         return response.get("job_id")
