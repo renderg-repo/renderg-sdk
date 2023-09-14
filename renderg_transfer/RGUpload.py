@@ -52,4 +52,4 @@ class RenderGUpload:
         code, stderr = renderg_utils.run_cmd(cmd, shell=True)
         print("cmd return code: {}".format(code))
         if code != 0:
-            raise Exception("{} 上传失败。 error={}".format(self.job_id, stderr))
+            raise Exception("{} 上传失败。 error={}".format(self.job_id, stderr.read()))

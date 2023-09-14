@@ -88,8 +88,13 @@ class AnalyzeHoudini(object):
             self.dcc_exe_path = self.find_dcc_exe()
 
         self._update_analyze_status(JobStatus.STATUS_ANALYZE_DOING)
+
         script_path = os.path.join(os.path.dirname(__file__), "houdini/run.py")
         cmd = cmd or [self.dcc_exe_path, script_path, "-input", self.dcc_file, "-output", self.info_path]
+        if env and hasattr(env, "update"):
+            env.update({"PYTHONUTF8": "1"})
+        else:
+            env = {"PYTHONUTF8": "1"}
         code, stderr = renderg_utils.run_cmd(cmd, shell=True, env=env)
         if code != 0:
             self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED)
