@@ -3,16 +3,16 @@
 import sys
 import os
 
-current_file = os.path.dirname(__file__)
+try:
+    current_file = os.path.dirname(__file__)
+except:
+    current_file = os.path.dirname(sys.argv[0])
 sys.path.insert(0, current_file)
 
 try:
     import HoudiniAnalyze
 except:
-    try:
-        import HoudiniAnalyze_py37 as HoudiniAnalyze
-    except:
-        import HoudiniAnalyze_py39 as HoudiniAnalyze
+    HoudiniAnalyze = __import__("HoudiniAnalyze_py%d%d" % (sys.version_info[0], sys.version_info[1]))
 
 args = sys.argv
 

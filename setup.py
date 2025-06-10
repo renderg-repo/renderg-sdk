@@ -12,7 +12,7 @@ def get_readme():
 
 setup(
     name='renderg-sdk',
-    version='0.1.11',
+    version='0.1.12',
     url='https://github.com/renderg-repo/renderg-sdk.git',
     author='RenderG',
     author_email='support@renderg.com',
