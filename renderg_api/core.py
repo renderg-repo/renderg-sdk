@@ -8,7 +8,7 @@ from renderg_api.mqConnect import MqConnect
 
 class RenderGAPI(object):
 
-    def __init__(self, auth_key=None, protocol='https', domain="v.renderg.com", cluster_id=None):
+    def __init__(self, auth_key=None, protocol='https', domain="client.renderg.com", cluster_id=None):
         auth_key = auth_key or os.getenv("RENDERG_AUTH_KEY")
         if not auth_key:
             raise TypeError(

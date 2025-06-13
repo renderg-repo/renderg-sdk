@@ -10,7 +10,7 @@ class MqttClient:
 
     def __init__(self, username, password):
         if MqttClient.client is None:
-            broker_address = "v.renderg.com"
+            broker_address = "client.renderg.com"
             port = 1883
 
             MqttClient.client = mqtt.Client(username)
