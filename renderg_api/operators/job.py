@@ -27,10 +27,11 @@ class JobOperator(object):
         response = self._connect.post(self._connect.urls.NewJob, params)
         return response.get("job_id")
 
-    def update_job_status(self, job_id, status):
+    def update_job_status(self, job_id, status, msg=""):
         params = {
             "job_id": job_id,
-            "status": status
+            "status": status,
+            "msg": msg
         }
         return self._connect.post(self._connect.urls.UpdateJobStatus, params)
 

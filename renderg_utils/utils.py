@@ -1,16 +1,17 @@
 import codecs
 import copy
 import json
+import logging
 import os
 import subprocess
 import sys
 import uuid
 
 PY_VERSION = sys.version_info[0]
-__version__ = '0.1.10'
+__version__ = '0.1.18'
 
 
-def get_workspace(workspace):
+def get_workspace(workspace=None):
     if workspace and os.path.isabs(workspace):
         return workspace
     else:
@@ -44,6 +45,7 @@ def check_path(path):
 
 
 def run_cmd(cmd, shell=False, env=None):
+    logger = logging.getLogger("run_cmd")
     if PY_VERSION == 2:
         cmd = str(cmd).encode(sys.getfilesystemencoding())
 
@@ -57,10 +59,14 @@ def run_cmd(cmd, shell=False, env=None):
             else:
                 current_env[k] = v
 
-    popen = subprocess.Popen(cmd, stderr=subprocess.PIPE, shell=shell, env=current_env)
-    popen.wait()
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=shell, env=current_env)
+    while popen.poll() is None:
+        result_line = popen.stdout.readline().strip()
+        if result_line:
+            logger.info(result_line.decode('utf-8', 'ignore'))
 
-    return popen.returncode, popen.stderr
+    stdout, stderr = popen.communicate()
+    return popen.returncode, stderr
 
 
 def get_dcc_file_version(file_path, regex):

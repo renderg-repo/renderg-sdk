@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 
@@ -26,7 +27,8 @@ class AnalyzeHoudini(object):
                  api=None,
                  project_id=None,
                  env_id=None,
-                 job_id=None
+                 job_id=None,
+                 logger=None
                  ):
 
         if not os.path.isfile(dcc_file):
@@ -39,6 +41,10 @@ class AnalyzeHoudini(object):
         self.project_id = project_id
         self.env_id = env_id
         self.job_id = job_id
+
+        if logger is None:
+            logger = logging.getLogger()
+        self.logger = logger
 
         if not job_id:
             self.job_id = self.api.job.new_job(self.dcc_file, self.project_id, self.env_id)
@@ -76,36 +82,41 @@ class AnalyzeHoudini(object):
                 regedit_dcc_exe_path, _ = winreg.QueryValueEx(key, "InstallPath")
                 dcc_exe_path = os.path.join(regedit_dcc_exe_path, r'bin\hython.exe')
             except BaseException as err:
-                print(err.__str__())
+                self.logger.warning(err.__str__())
         if not dcc_exe_path or not os.path.isfile(dcc_exe_path):
             raise DCCExeNotFoundError(ErrorCode.DCCExeNotFoundError, self.dcc_version)
 
         return dcc_exe_path
 
     def analyze(self, cmd=None, env=None):
+        self._update_analyze_status(JobStatus.STATUS_ANALYZE_DOING)
+
         self.check_file_version()
         if not self.dcc_exe_path:
             self.dcc_exe_path = self.find_dcc_exe()
 
-        self._update_analyze_status(JobStatus.STATUS_ANALYZE_DOING)
-
-        script_path = os.path.join(os.path.dirname(__file__), "houdini/run.py")
-        cmd = cmd or [self.dcc_exe_path, script_path, "-input", self.dcc_file, "-output", self.info_path]
         if env and hasattr(env, "update"):
             env.update({"PYTHONUTF8": "1"})
         else:
             env = {"PYTHONUTF8": "1"}
+
+        script_path = os.path.join(os.path.dirname(__file__), "houdini/run.py")
+        cmd = cmd or [self.dcc_exe_path, script_path, "-input", self.dcc_file, "-output", self.info_path]
+        self.logger.info("Running command: {}".format(cmd))
+
         code, stderr = renderg_utils.run_cmd(cmd, shell=True, env=env)
         if code != 0:
-            self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED)
-            raise AnalyzeFailError(ErrorCode.AnalyzeFailError, stderr.read() or "analyze exits unexpectedly")
+            error_msg = stderr or "analyze exits unexpectedly"
+            self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED, error_msg)
+            raise AnalyzeFailError(ErrorCode.AnalyzeFailError, error_msg)
 
         if not os.path.isfile(self.info_path):
-            self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED)
-            raise AnalyzeFailError(ErrorCode.AnalyzeFailError, "info.cfg not found.")
+            error_msg = "info.cfg not found. info_path=".format(self.info_path)
+            self._update_analyze_status(JobStatus.STATUS_ANALYZE_FAILED, error_msg)
+            raise AnalyzeFailError(ErrorCode.AnalyzeFailError, error_msg)
 
         self._update_analyze_status(JobStatus.STATUS_ANALYZED)
         return self
 
-    def _update_analyze_status(self, status):
-        self.api.job.update_job_status(self.job_id, status)
+    def _update_analyze_status(self, status, msg=""):
+        self.api.job.update_job_status(self.job_id, status, msg)

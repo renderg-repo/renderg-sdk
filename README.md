@@ -35,7 +35,9 @@
 ### 分析资产并上传
 
 ```python
-from renderg_utils import utils
+import os
+
+from renderg_utils import utils, log
 from analyze_houdini import AnalyzeHoudini
 from renderg_api import RenderGAPI
 from renderg_api.constants import TransferLines
@@ -43,26 +45,37 @@ from renderg_api.param_check import RenderGParamChecker
 from renderg_transfer.RGUpload import RenderGUpload
 from renderg_transfer.RGDownload import RenderGDownload
 
-# ========分析资产和渲染参数==========
-# 1. 读取配置文件
-config = utils.read_json("./config.json")
 
+# ========分析资产和设置渲染参数==========
+
+# 1. 读取配置文件并设置工作目录
+config = utils.read_json("./config.json")
+workspace = config.get("WORKSPACE", os.path.expandvars("%userprofile%/RenderG_WorkSpace"))
+
+# 2. 设置日志模块
+log.init_logging(log_dir=utils.get_workspace(workspace), console=True)
+logger = log.get_logger()
+logger.info("SDK Version: {}".format(utils.get_version()))
+
+
+# 3.  创建任务信息
 api = RenderGAPI(auth_key=config["AUTH_KEY"], cluster_id=config["CLUSTER_ID"])
 
-# 2.  创建任务信息
 analyze_info = {
-    "dcc_file": r"D:\houdini_file\JSBL_lgt_qunji_wmy_v001.hip",
-    "dcc_version": "19.0.622",
-    "api": api,
+    "dcc_file": r"D:\houdini_file\JSBL_lgt_qunji_wmy_v001.hip", # DCC 文件路径
+    "dcc_version": "19.0.622", # DCC 版本号
+    "api": api, # RenderGAPI 实例
     "project_id": config["PROJECT_ID"],  # 项目ID
-    "env_id": config["ENV_ID"]  # 环境ID
+    "env_id": config["ENV_ID"],  # 环境ID
+    "workspace": workspace,  # 工作目录
+    "logger": logger, # 日志记录器
 }
-# 3. 分析资产列表和场景渲染参数
+# 4. 分析资产列表和场景渲染参数
 analyze_obj = AnalyzeHoudini(**analyze_info)
 analyze_obj.analyze()
-print(analyze_obj.info_path)
+logger.info(analyze_obj.info_path)
 
-# 4. 设置选择参数信息
+# 5. 设置选择参数信息
 param_check_obj = RenderGParamChecker(api, analyze_obj)
 render_params = {
     "ChunkSize": 1,  # 一机多帧
@@ -98,7 +111,7 @@ renderg_upload.upload()
 
 # 4. 上传完成，提交任务，开始渲染
 submit = api.job.submit_job(job_id)
-print(submit["msg"])
+logger.info(submit["msg"])
 
 # 5. 下载
 # 等待任务完成下载
