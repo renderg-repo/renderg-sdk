@@ -13,7 +13,10 @@ class MqttClient:
             broker_address = "client.renderg.com"
             port = 1883
 
-            MqttClient.client = mqtt.Client(username)
+            if hasattr(mqtt, "CallbackAPIVersion"):
+                MqttClient.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, username)
+            else:
+                MqttClient.client = mqtt.Client(username)
             MqttClient.client.on_connect = MqttClient.on_connect
             MqttClient.client.on_message = MqttClient.on_message
             if username and password:
