@@ -5,5 +5,5 @@ class ProjectOperator(object):
         self._connect = connect
 
     def get_project_list(self):
-        response = self._connect.post(self._connect.urls.GetProjectList)
+        response = self._connect.get(self._connect.urls.GetProjectList)
         return response.get("data")

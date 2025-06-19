@@ -9,7 +9,7 @@ import traceback
 import uuid
 
 PY_VERSION = sys.version_info[0]
-__version__ = '0.1.20'
+__version__ = '0.1.21'
 
 
 def get_workspace(workspace=None):
