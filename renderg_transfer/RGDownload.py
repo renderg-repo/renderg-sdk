@@ -35,7 +35,7 @@ class RenderGDownload:
         renderg_utils.check_path(self.log_path)
 
         auth_key = self.api.mqConnect.get_key()
-        self.mqtt_client = MqttClient('{}_sdk'.format(self.user_id), auth_key)
+        self.mqtt_client = MqttClient('{}_{}_sdk'.format(self.user_id, time.time()), auth_key)
         self.jobEnd_list = []
 
     def mq_callback(self, result):
