@@ -10,7 +10,11 @@ from renderg_transfer.MQClient import MqttClient
 
 class RenderGDownload:
 
-    def __init__(self, api, job_id, download_path, line, cluster_id, speed=1000, workspace=None):
+    def __init__(self, api, job_id, download_path, line, cluster_id, speed=1000, workspace=None, logger=None):
+        if logger is None:
+            logger = renderg_utils.get_logger()
+        self.logger = logger
+
         self.api = api
         if job_id is not None:
             self.transfer_config = api.transfer.get_transfer_config(job_id)
@@ -35,7 +39,7 @@ class RenderGDownload:
         self.jobEnd_list = []
 
     def mq_callback(self, result):
-        print("Received message: " + result)
+        self.logger.info("Received message: " + result)
         payload = json.loads(result)
         if payload.get('type_id') == '030003':
             data = payload.get('data')
@@ -47,7 +51,7 @@ class RenderGDownload:
         status = job_info.get('Status')
         if status != JobStatus.STATUS_COMPLETED:
             # 任务未完成，监听mqtt状态，等待完成
-            print("{} 任务未完成，等待渲染完成后下载···".format(self.job_id))
+            self.logger.info("{} 任务未完成，等待渲染完成后下载···".format(self.job_id))
             self.mqtt_client.subscribe(
                 'mqtt/front/user/{user_id}/{job_id}'.format(user_id=self.user_id, job_id=self.job_id),
                 self.mq_callback
@@ -60,7 +64,7 @@ class RenderGDownload:
                     break
                 time.sleep(3)
 
-        print("{job_id}:渲染完成。开始下载".format(job_id=self.job_id))
+        self.logger.info("{job_id}:渲染完成。开始下载".format(job_id=self.job_id))
 
         username = self.transfer_config.get("output_username")
         password = self.transfer_config.get("password")
@@ -80,9 +84,9 @@ class RenderGDownload:
             source_path=files_source_path,
             dest_path=files_dest_path
         )
-        print(cmd)
+        self.logger.info(cmd)
         code, stderr = renderg_utils.run_cmd(cmd, shell=True)
-        print("cmd return code: {}".format(code))
+        self.logger.info("cmd return code: {}".format(code))
         if code != 0:
             raise Exception("{} 下载失败。error={}".format(self.job_id, stderr))
 
@@ -113,8 +117,8 @@ class RenderGDownload:
             log_dir=self.log_path,
             pair_list_file=file_pair_list_path
         )
-        print(cmd)
+        self.logger.info(cmd)
         code, stderr = renderg_utils.run_cmd(cmd, shell=True)
-        print("cmd return code: {}".format(code))
+        self.logger.info("cmd return code: {}".format(code))
         if code != 0:
             raise Exception("{} 下载失败。error={}".format(self.job_id, stderr))

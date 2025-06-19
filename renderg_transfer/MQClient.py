@@ -1,6 +1,9 @@
 import time
 
 import paho.mqtt.client as mqtt
+import renderg_utils
+
+logger = renderg_utils.get_logger()
 
 
 class MqttClient:
@@ -27,9 +30,9 @@ class MqttClient:
     @staticmethod
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            print("Connected successfully")
+            logger.info("Connected successfully")
         else:
-            print("Connection failed with code {rc}".format(rc=rc))
+            logger.info("Connection failed with code {rc}".format(rc=rc))
         MqttClient.rc = rc
 
     @staticmethod
@@ -48,7 +51,7 @@ class MqttClient:
     def subscribe(topic, callback):
         while True:
             if MqttClient.rc == 0:
-                print('订阅主题：{topic}'.format(topic=topic))
+                logger.info('订阅主题：{topic}'.format(topic=topic))
                 MqttClient.client.subscribe(topic, qos=0)
                 MqttClient.callbacks[topic] = callback
                 break

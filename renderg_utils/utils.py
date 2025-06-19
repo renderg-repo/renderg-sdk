@@ -5,10 +5,11 @@ import logging
 import os
 import subprocess
 import sys
+import traceback
 import uuid
 
 PY_VERSION = sys.version_info[0]
-__version__ = '0.1.18'
+__version__ = '0.1.20'
 
 
 def get_workspace(workspace=None):
@@ -80,7 +81,6 @@ def get_dcc_file_version(file_path, regex):
             try:
                 line = line.decode('utf-8', 'ignore')
             except BaseException as err:
-                # print(err)
                 pass
 
             res = regex.search(line)
@@ -157,5 +157,5 @@ class SceneType:
             elif scene_type in ['.blend']:
                 return SceneType.blender
         except Exception as e:
-            print(e)
+            traceback.print_exc()
         return ''

@@ -3,6 +3,7 @@ import os
 import json
 import re
 import time
+import traceback
 
 import renderg_utils
 
@@ -27,7 +28,7 @@ class TransferHelper:
                     info_json = json.loads(f.read())
                 return info_json
             except BaseException as e:
-                print(e)
+                traceback.print_exc()
         return {}
 
     @staticmethod

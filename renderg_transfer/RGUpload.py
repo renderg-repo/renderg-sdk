@@ -10,7 +10,11 @@ import renderg_utils
 
 class RenderGUpload:
 
-    def __init__(self, api, job_id, info_path, line, speed, workspace=None):
+    def __init__(self, api, job_id, info_path, line, speed, workspace=None, logger=None):
+        if logger is None:
+            logger = renderg_utils.get_logger()
+        self.logger = logger
+
         self.api = api
         self.transfer_config = api.transfer.get_transfer_config(job_id)
         self.transfer_lines = api.transfer.get_transfer_line(line)
@@ -48,8 +52,8 @@ class RenderGUpload:
             log_dir=self.log_path,
             pair_list_file=file_pair_list_path
         )
-        print(cmd)
+        self.logger.info(cmd)
         code, stderr = renderg_utils.run_cmd(cmd, shell=True)
-        print("cmd return code: {}".format(code))
+        self.logger.info("cmd return code: {}".format(code))
         if code != 0:
             raise Exception("{} 上传失败。 error={}".format(self.job_id, stderr.read()))
