@@ -102,7 +102,7 @@ upload_kwargs = {
     "api": api,
     "job_id": job_id,
     "info_path": info_path,
-    "line": TransferLines.LINE_RENDERG,
+    "line": TransferLines.LINE_UNICOM,
     "speed": 200  # 上传速度限制，单位为 Mbps
 }
 # 3. 开始上传
@@ -119,7 +119,7 @@ download_kwargs = {
     "api": api,
     "job_id": job_id,
     "download_path": "d:/test",  # 下载保存到本地路径
-    "line": TransferLines.LINE_RENDERG,
+    "line": TransferLines.LINE_UNICOM,
     "cluster_id": config["CLUSTER_ID"],
     "speed": 500  # 上传速度限制，单位为 Mbps
 }
@@ -132,7 +132,7 @@ download_others_json = {
     "api": api,
     "job_id": None,
     "download_path": "d:/test",  # 下载保存到本地路径
-    "line": TransferLines.LINE_RENDERG,
+    "line": TransferLines.LINE_UNICOM,
     "cluster_id": config["CLUSTER_ID"],
     "speed": 3000  # 上传速度限制，单位为 Mbps
 }
