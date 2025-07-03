@@ -15,6 +15,10 @@ class ApiUrl(str, Enum):
     SubmitJob = "/api/v1/front/job/submit"
     DelJob = "/api/v1/front/job/del"
     SetJobConfig = "/api/v1/front/job/cluster_id"
+    GetJobList = "/api/v1/front/job/filter"
+
+    GetTaskList = "/api/v1/front/job/task"
+    ControlTask = "/api/v1/front/job/task/control"
 
     GetClusterList = "/api/v1/front/cluster/current"
     GetZoneList = "/api/v1/front/zone/list"

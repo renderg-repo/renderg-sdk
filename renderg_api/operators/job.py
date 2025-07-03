@@ -47,7 +47,7 @@ class JobOperator(object):
         return self._control_job(job_ids, ControlType.START, tiled_job_ids)
 
     def stop_job(self, job_ids: 'list', tiled_job_ids: 'list' = []):
-        return self._control_job(job_ids, ControlType.STOP, tiled_job_ids)
+        return self._control_job(job_ids, ControlType.SUSPEND, tiled_job_ids)
 
     def speedup_job(self, job_ids: 'list', tiled_job_ids: 'list' = []):
         return self._control_job(job_ids, ControlType.SPEEDUP, tiled_job_ids)
@@ -77,3 +77,41 @@ class JobOperator(object):
 
     def get_jobs_info(self, job_id):
         return self._connect.get(self._connect.urls.JobInfo + str(job_id))
+
+    def get_job_list(self, page=1, count=20, json_params=None):
+        """
+        Retrieve a paginated list of jobs based on the provided filters.
+
+        Args:
+            page (int): The page number to retrieve. Defaults to 1.
+            count (int): The number of items per page. Defaults to 20.
+            json_params (dict, optional): Additional filtering parameters for the job list.
+                Example:
+                    {
+                        "job_id_list": [],
+                        "project_id": 0,
+                        "project_id_array": [],
+                        "cluster_id": 0,
+                        "cluster_id_array": [],
+                        "submit_users": [],
+                        "ram_limit": "",
+                        "user_ids": [],
+                        "zone_id": 0,
+                        "search": "",
+                        "sort": "",
+                        "start_date": "",
+                        "end_date": "",
+                        "desc": true,
+                        "status": ["Submitting", "Queued", "Pending", "Suspended", "Rendering", "Completed", "WaitForFull", "10033", "Failed", "10037"]
+                    }
+
+        Returns:
+            dict: The response containing the job list and pagination details.
+        """
+
+        url_params = {
+            'page': page,
+            'count': count
+        }
+
+        return self._connect.post(self._connect.urls.GetJobList, data=json_params, params=url_params)
