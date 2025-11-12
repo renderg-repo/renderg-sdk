@@ -64,10 +64,23 @@ def run_cmd(cmd, shell=False, env=None):
     while popen.poll() is None:
         result_line = popen.stdout.readline().strip()
         if result_line:
-            logger.info(result_line.decode('utf-8', 'ignore'))
+            logger.info(decode_line(result_line))
 
     stdout, stderr = popen.communicate()
     return popen.returncode, stderr
+
+
+def decode_line(line):
+    res = ""
+    for code in [ "utf-8", "gbk"]:
+        try:
+            res = line.decode(code)
+        except UnicodeDecodeError:
+            continue
+    if not res:
+        res = line.decode("gbk", "ignore")
+
+    return res
 
 
 def get_dcc_file_version(file_path, regex):

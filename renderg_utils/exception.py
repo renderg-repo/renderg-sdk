@@ -13,7 +13,8 @@ class WarnCode(Enum):
 
 class ErrorCode(Enum):
     DCCFileNotExistsError = ("000000", "{} is not exist!")
-    DCCExeNotFoundError = ("000001", "Houdini {} not found locally!")
+    DCCExeNotFoundError = ("000001", "{} {} not found locally!")
+    MayaProjectInvalidError = ("000100", "Maya project {} not found locally!")
     AnalyzeFailError = ("000002", "{}")
 
     def code(self):

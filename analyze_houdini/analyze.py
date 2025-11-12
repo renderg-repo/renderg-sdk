@@ -84,7 +84,7 @@ class AnalyzeHoudini(object):
             except BaseException as err:
                 self.logger.warning(err.__str__())
         if not dcc_exe_path or not os.path.isfile(dcc_exe_path):
-            raise DCCExeNotFoundError(ErrorCode.DCCExeNotFoundError, self.dcc_version)
+            raise DCCExeNotFoundError(ErrorCode.DCCExeNotFoundError, "Houdini", self.dcc_version)
 
         return dcc_exe_path
 

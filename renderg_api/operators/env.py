@@ -6,10 +6,10 @@ class EnvOperator(object):
     def __init__(self, connect):
         self._connect = connect
 
-    def get_env_list(self):
+    def get_env_list(self, software_name="", software_version=""):
         params = {
-            'software_name': "",
-            'software_version': ""
+            'software_name': software_name,
+            'software_version': software_version
         }
         response = self._connect.post(self._connect.urls.GetEnvList, params)
         return response.get("data")
