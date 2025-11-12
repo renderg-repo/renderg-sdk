@@ -11,8 +11,8 @@ def get_readme():
 
 
 setup(
-    name='renderg-sdk',
-    version='0.1.25',
+    name='renderg_sdk',
+    version='0.1.27',
     url='https://github.com/renderg-repo/renderg-sdk.git',
     author='RenderG',
     author_email='support@renderg.com',
@@ -28,7 +28,7 @@ setup(
     ],
     package_data={
         'analyze_houdini': ["./houdini/*"],
-        'analyze_maya': ["./maya/*/*/*"],
+        'analyze_maya': ["./maya/*", "./maya/*/*", "./maya/*/*/*"],
         'analyze_clarisse': ["./clarisse/*"],
         'ascp': ["./*/*"],
         'example': ["./example/*"],
