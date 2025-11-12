@@ -20,15 +20,16 @@ logger = log.get_logger()
 logger.info("SDK Version: {}".format(utils.get_version()))
 
 
-# 3.  创建任务信息
+# 3.  实例化API
 api = RenderGAPI(auth_key=config["AUTH_KEY"], cluster_id=config["CLUSTER_ID"])
 
+# 分析所需环境信息
 analyze_info = {
     "dcc_file": r"E:\Work\Scene\Houdini\20.5.584.hip", # DCC 文件路径
     "dcc_version": "20.5.584", # DCC 版本号
     "api": api, # RenderGAPI 实例
-    "project_id": 42310,  # 项目ID
-    "env_id": 16884,  # 环境ID
+    "project_id": 42310,  # 项目ID, 可通过 api.project.get_project_list() 获取
+    "env_id": 16884,  # 环境ID, 可通过 api.env.get_env_list() 获取
     "workspace": workspace,  # 工作目录
     "logger": logger, # 日志记录器
 }
@@ -37,7 +38,7 @@ analyze_obj = AnalyzeHoudini(**analyze_info)
 analyze_obj.analyze()
 logger.info(analyze_obj.info_path)
 
-# 5. 设置选择参数信息
+# 5. 设置渲染参数信息
 param_check_obj = ParamChecker(api, analyze_obj)
 render_params = {
     "ChunkSize": 1,  # 一机多帧
@@ -47,6 +48,7 @@ render_params = {
     "zone_id": config["ZONE_ID"],  # CPU 配置信息
     "ram_limit": config["RAM_LIMIT"],  # 内存配置
 }
+# 设置提交的渲染节点及帧范围
 param_check_obj.set_render_nodes({
     "/out/mantra1": "1-5"
 })
