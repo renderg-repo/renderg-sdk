@@ -21,6 +21,7 @@ class EnvOperator(object):
                 environment_info = {
                     'software_name': env_item.get('software_name'),
                     'software_version': env_item.get('software_version'),
+                    'project_path': env_item.get('project_path'),
                     'definition': definition,
                     'extra_info': json.loads(env_item.get('extra_info')) if env_item.get('extra_info') else {}
                 }

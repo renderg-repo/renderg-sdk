@@ -16,10 +16,13 @@ log.init_logging(log_dir=utils.get_workspace(workspace), console=True)
 logger = log.get_logger()
 logger.info("SDK Version: {}".format(utils.get_version()))
 
+# 获取环境配置
+env_info = api.env.get_env_info_by_id(17877)
+
 analyze_info = {
     "dcc_file": os.path.normpath(r"E:\Work\Scene\Maya\2025.3.ma"),
     "dcc_version": "2025",
-    "project_path": r"E:\Work\Scene\Maya",
+    "project_path": env_info.get("project_path") or r"E:\Work\Scene\Maya", # 项目路径， 如果环境中配置了项目路径，可使用环境中的配置，也可重新配置
     "api": api,
     "project_id": 42310,
     "env_id": 17877,
