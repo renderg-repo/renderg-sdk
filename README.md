@@ -20,17 +20,17 @@
      "CLUSTER_ID": 27,
      "PROJECT_ID": 21479,
      "ENV_ID": 7715,
-     "ZONE_ID": 1003,
+     "ZONE_ID": 1009,
      "RAM_LIMIT": "64G"
    }
    ```
 
 - AUTH_KEY 用户身份认证，请联系 [RenderG 渲染农场](https://www.renderg.com/)平台技术支持获取；
-- CLUSTER_ID 区域 ID ，一般为固定；
-- PROJECT_ID，提交任务默认项目，在客户端项目管理中创建；
-- ENV_ID ，提交任务默认环境，在客户端环境管理中创建；
-- ZONE_ID，提交任务默认配置，默认请使用 1003；
-- RAM_LIMIT，提交任务默认内存配置，64G、128G、256G 可选；
+- CLUSTER_ID 区域 ID ，一般为固定；可通过 api.config.get_cluster_list() 获取
+- PROJECT_ID，提交任务默认项目，在客户端项目管理中创建；可通过 api.project.get_project_list() 获取
+- ENV_ID ，提交任务默认环境，在客户端环境管理中创建；可通过 api.env.get_env_list() 获取
+- ZONE_ID，提交任务默认配置；可通过 api.config.get_zone_list() 获取
+- RAM_LIMIT，提交任务默认内存配置，64G、128G、256G 可选；可通过 api.config.get_zone_list() 获取
 
 ### 分析资产并上传
 
