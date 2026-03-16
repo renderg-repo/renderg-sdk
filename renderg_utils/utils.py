@@ -13,6 +13,19 @@ __version__ = '0.1.29'
 
 
 def get_workspace(workspace=None):
+    """
+    获取RenderG工作目录。
+    
+    Args:
+        workspace (str, optional): 自定义工作目录路径。
+        
+    Returns:
+        str: 工作目录绝对路径。
+        
+    Notes:
+        - 如果提供了自定义工作目录且为绝对路径，则使用该路径
+        - 否则，使用默认路径：用户主目录下的RenderG_WorkSpace
+    """
     if workspace and os.path.isabs(workspace):
         return workspace
     else:
@@ -20,6 +33,16 @@ def get_workspace(workspace=None):
 
 
 def read_json(json_path, encoding='utf-8'):
+    """
+    读取JSON文件内容。
+    
+    Args:
+        json_path (str): JSON文件路径。
+        encoding (str, optional): 文件编码，默认为'utf-8'。
+        
+    Returns:
+        dict or list: JSON文件内容，或None（如果文件不存在）。
+    """
     if os.path.exists(json_path):
         with codecs.open(json_path, 'r', encoding=encoding) as f:
             data = json.load(f)
@@ -27,6 +50,15 @@ def read_json(json_path, encoding='utf-8'):
 
 
 def write_json(file_path, data, encoding="utf-8", ensure_ascii=True):
+    """
+    将数据写入JSON文件。
+    
+    Args:
+        file_path (str): 输出文件路径。
+        data (dict or list): 要写入的数据。
+        encoding (str, optional): 文件编码，默认为'utf-8'。
+        ensure_ascii (bool, optional): 是否确保ASCII编码，默认为True。
+    """
     with codecs.open(file_path, 'w', encoding=encoding) as f:
         if PY_VERSION == 3:
             json.dump(data, f, ensure_ascii=ensure_ascii, indent=4)
@@ -36,10 +68,17 @@ def write_json(file_path, data, encoding="utf-8", ensure_ascii=True):
 
 def check_path(path):
     """
-    check the system path, create path if it's not exists
-
-    :param path: a system path
-    :return: None
+    检查并创建系统路径。
+    
+    Args:
+        path (str): 系统路径。
+    
+    Returns:
+        None
+        
+    Notes:
+        - 如果路径不存在，则创建该路径
+        - 如果路径已存在，则不做任何操作
     """
     if not os.path.isdir(path):
         os.makedirs(path)

@@ -11,8 +11,23 @@ from renderg_api.urls import assemble_api_url, ApiUrl
 
 
 class Connect(object):
+    """
+    与RenderG服务器进行HTTP通信的连接类。
+    
+    该类负责处理所有与服务器的HTTP请求，包括认证、请求发送、重试机制和错误处理。
+    """
 
     def __init__(self, auth_key, protocol, domain, cluster_id, header=None):
+        """
+        初始化连接实例。
+        
+        Args:
+            auth_key (str): 用户认证密钥。
+            protocol (str): 通信协议（http/https）。
+            domain (str): 服务器域名和端口。
+            cluster_id (str): 集群ID。
+            header (dict, optional): 自定义HTTP请求头。
+        """
         self.cluster_id = cluster_id
         self.urls = ApiUrl
 
@@ -28,11 +43,32 @@ class Connect(object):
 
     @property
     def headers(self):
+        """
+        获取当前HTTP请求头。
+        
+        Returns:
+            dict: HTTP请求头字典。
+        """
         return self._headers
 
     @retry(reraise=True, stop=stop_after_attempt(5),
            wait=wait_random(min=1, max=2))
     def post(self, api_url, data=None, params=None, validator=True):
+        """
+        发送POST请求到服务器。
+        
+        Args:
+            api_url (str): API路径。
+            data (dict, optional): 请求数据。
+            params (dict, optional): URL参数。
+            validator (bool, optional): 是否进行数据验证，默认为True。
+            
+        Returns:
+            dict: 服务器响应的JSON数据。
+            
+        Raises:
+            RenderGAPIError: 当服务器返回错误时抛出。
+        """
         if not data:
             data = {}
 
@@ -55,6 +91,21 @@ class Connect(object):
     @retry(reraise=True, stop=stop_after_attempt(5),
            wait=wait_random(min=1, max=2))
     def get(self, api_url, data=None, params=None, validator=True):
+        """
+        发送GET请求到服务器。
+        
+        Args:
+            api_url (str): API路径。
+            data (dict, optional): 请求数据。
+            params (dict, optional): URL参数。
+            validator (bool, optional): 是否进行数据验证，默认为True。
+            
+        Returns:
+            dict: 服务器响应的JSON数据。
+            
+        Raises:
+            RenderGAPIError: 当服务器返回错误时抛出。
+        """
         if not data:
             data = {}
 

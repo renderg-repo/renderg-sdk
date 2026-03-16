@@ -9,8 +9,25 @@ import renderg_utils
 
 
 class RenderGUpload:
+    """
+    RenderG文件上传类，用于将渲染资产上传到RenderG服务器。
+    
+    该类封装了使用Aspera协议进行高效文件传输的功能，包括资产路径处理、传输配置管理和上传过程监控。
+    """
 
     def __init__(self, api, job_id, info_path, line, speed, workspace=None, logger=None):
+        """
+        初始化文件上传实例。
+        
+        Args:
+            api (RenderGAPI): RenderG API实例。
+            job_id (str): 作业ID。
+            info_path (str): 资产信息配置文件路径。
+            line (str): 传输线路。
+            speed (int, optional): 传输速度限制（KB/s）。
+            workspace (str, optional): 工作目录。
+            logger (logging.Logger, optional): 日志记录器。
+        """
         if logger is None:
             logger = renderg_utils.get_logger()
         self.logger = logger
@@ -30,6 +47,19 @@ class RenderGUpload:
         renderg_utils.check_path(self.log_path)
 
     def upload(self):
+        """
+        执行文件上传操作。
+        
+        该方法会：
+        1. 更新作业状态为上传中
+        2. 从配置文件中获取源文件路径和目标路径
+        3. 构建Aspera传输命令
+        4. 执行上传命令
+        5. 处理上传结果
+        
+        Raises:
+            Exception: 当上传失败时抛出异常。
+        """
         self.api.job.update_job_status(self.job_id, JobStatus.STATUS_UPLOAD)
         source_paths, dest_paths = AssetsPathHelper.get_file_list_for_info_cfg(self.info_path, self.job_id)
 
