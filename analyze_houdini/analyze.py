@@ -33,6 +33,44 @@ class AnalyzeHoudini(object):
                  logger=None
                  ):
 
+        """
+        Args:
+            dcc_file (str): Houdini 场景文件的绝对路径（``.hip`` / ``.hiplc`` / ``.hipnc``）。
+            dcc_version (str): Houdini 版本号，例如 ``"20.5.584"``。
+            workspace (str, optional): 本地工作目录根路径，用于存放分析产物。
+                默认使用系统用户目录下的 ``RenderG_WorkSpace``。
+            dcc_exe_path (str, optional): ``hython.exe`` 的完整路径。
+                未指定时自动从注册表查找。
+            api (RenderGAPI, optional): 已实例化的 API 对象。
+            project_id (int, optional): RenderG 项目 ID。
+            env_id (int, optional): RenderG 渲染环境 ID。
+            job_id (str, optional): 已有的任务号。传入后直接使用，不再申请新任务号。
+            auto_create_job (bool, optional): 是否在初始化时自动申请任务号，默认为 ``True``。
+                设为 ``False`` 时，初始化阶段不向服务端申请任务号，本地工作目录以 UUID 命名；
+                需在调用 ``param_check.execute()`` 前手动调用 ``api.job.new_job()``
+                并将返回值赋给 ``analyze_obj.job_id``。
+            logger (logging.Logger, optional): 日志对象，未指定时使用根 Logger。
+
+        Example:
+            默认行为，初始化时自动申请任务号::
+
+                analyze_obj = AnalyzeHoudini(
+                    dcc_file=r"E:\\scene.hip",
+                    dcc_version="20.5.584",
+                    api=api, project_id=42310, env_id=16884,
+                )
+
+            延后申请任务号（``auto_create_job=False``）::
+
+                analyze_obj = AnalyzeHoudini(
+                    dcc_file=r"E:\\scene.hip",
+                    dcc_version="20.5.584",
+                    api=api, project_id=42310, env_id=16884,
+                    auto_create_job=False,
+                )
+                analyze_obj.analyze()
+                analyze_obj.job_id = api.job.new_job(analyze_obj.dcc_file, 42310, 16884)
+        """
         if not os.path.isfile(dcc_file):
             raise DCCFileNotExistsError(ErrorCode.DCCFileNotExistsError, dcc_file)
 
