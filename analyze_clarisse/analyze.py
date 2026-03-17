@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import uuid
 
 from renderg_api.constants import JobStatus
 
@@ -28,6 +29,7 @@ class AnalyzeClarisse(object):
                  project_id=None,
                  env_id=None,
                  job_id=None,
+                 auto_create_job=True,
                  logger=None
                  ):
 
@@ -47,9 +49,11 @@ class AnalyzeClarisse(object):
         self.logger = logger
 
         if not job_id:
-            self.job_id = self.api.job.new_job(self.dcc_file, self.project_id, self.env_id)
+            if auto_create_job:
+                self.job_id = self.api.job.new_job(self.dcc_file, self.project_id, self.env_id)
 
-        self.workspace = os.path.join(renderg_utils.get_workspace(workspace), str(self.job_id))
+        _local_id = str(self.job_id) if self.job_id else str(uuid.uuid4())
+        self.workspace = os.path.join(renderg_utils.get_workspace(workspace), _local_id)
         renderg_utils.check_path(self.workspace)
 
         self.info_path = os.path.join(self.workspace, "info.cfg")
@@ -91,4 +95,6 @@ class AnalyzeClarisse(object):
         return self
 
     def _update_analyze_status(self, status, msg=""):
+        if self.job_id is None:
+            return
         self.api.job.update_job_status(self.job_id, status, msg)

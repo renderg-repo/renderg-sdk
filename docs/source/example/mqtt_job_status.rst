@@ -68,8 +68,6 @@ mqtt_job_status.py
      - 子任务状态变更
      - ``identification`` 层名称，``old_status`` 原状态，``new_status`` 新状态
 
-其他 ``type_id`` 的消息会记录到日志并存入 ``received`` 列表，便于后续扩展。
-
 **完整代码**
 
 .. literalinclude:: ../../../example/mqtt_job_status.py

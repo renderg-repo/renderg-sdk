@@ -66,6 +66,9 @@ class ParamChecker:
         if not self.render_layers:
             raise ValueError("No render layers specified, please set render layers using set_render_layers() method")
 
+        if self.analyze_obj.job_id is None:
+            raise ValueError("job_id is not set. Call api.job.new_job() first and assign the result to analyze_obj.job_id")
+
         if "zone_id" not in kwargs:
             raise ValueError('Required "zone_id" not specified')
         if "ram_limit" not in kwargs:
