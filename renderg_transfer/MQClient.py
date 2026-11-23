@@ -21,13 +21,15 @@ class MqttClient:
     #: MQTT 连接状态码，``0`` 表示连接成功（类变量）。
     rc = None
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, proxy=None):
         """
         初始化 MQTT 客户端并建立连接（若尚未连接）。
 
         Args:
             username (str): MQTT 连接用户名，格式通常为 ``{user_id}_{timestamp}_sdk``。
             password (str): MQTT 连接密码（对应 RenderG auth_key）。
+            proxy (dict, optional): 定制代理程序配置。启用后 MQTT 通过该代理的 HTTP 端口连接，
+                需要安装 ``PySocks``。
         """
         if MqttClient.client is None:
             broker_address = "client.renderg.com"
@@ -39,10 +41,30 @@ class MqttClient:
                 MqttClient.client = mqtt.Client(username)
             MqttClient.client.on_connect = MqttClient.on_connect
             MqttClient.client.on_message = MqttClient.on_message
+            MqttClient._set_proxy(MqttClient.client, proxy)
             if username and password:
                 MqttClient.client.username_pw_set(username, password)
             MqttClient.client.connect(broker_address, port)
             MqttClient.client.loop_start()
+
+    @staticmethod
+    def _set_proxy(client, proxy):
+        if not proxy or not proxy.get("state"):
+            return
+        proxy_host = proxy.get("host")
+        proxy_port = proxy.get("api_port")
+        if not proxy_host or not proxy_port:
+            return
+        try:
+            import socks
+        except ImportError:
+            logger.warning("PySocks is required for MQTT proxy; proxy setting ignored")
+            return
+        try:
+            client.proxy_set(proxy_type=socks.HTTP, proxy_addr=proxy_host, proxy_port=int(proxy_port))
+            logger.info("MQTT proxy enabled: %s:%s", proxy_host, proxy_port)
+        except Exception as err:
+            logger.warning("set MQTT proxy failed: %s", err)
 
     @staticmethod
     def on_connect(client, userdata, flags, rc):

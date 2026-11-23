@@ -13,7 +13,7 @@ class RenderGAPI(object):
     该类提供了统一的接口，封装了与渲染服务的连接、用户管理、任务管理、作业管理等功能。
     """
 
-    def __init__(self, auth_key=None, protocol='https', domain="client.renderg.com:6443", cluster_id=None):
+    def __init__(self, auth_key=None, protocol='https', domain="client.renderg.com:6443", cluster_id=None, proxy=None):
         """
         初始化RenderGAPI实例。
         
@@ -22,6 +22,8 @@ class RenderGAPI(object):
             protocol (str, optional): 通信协议，默认为'https'。
             domain (str, optional): 服务器域名和端口，默认为'client.renderg.com:6443'。
             cluster_id (str, optional): 集群ID，用于指定使用的渲染集群。
+            proxy (dict, optional): 定制代理程序配置。启用后 API 请求和 ascp 传输都会走代理，
+                格式为 ``{"state": True, "host": "127.0.0.1", "api_port": 8899}``。
             
         Raises:
             TypeError: 当未提供auth_key且环境变量中也不存在时抛出。
@@ -33,7 +35,7 @@ class RenderGAPI(object):
                 'in environment variable RENDERG_AUTH_KEY.'
             )
 
-        self._connect = Connect(auth_key, protocol, domain, cluster_id)
+        self._connect = Connect(auth_key, protocol, domain, cluster_id, proxy=proxy)
 
         self.user = UserOperator(self._connect)  # 用户操作符
         self.job = JobOperator(self._connect)  # 作业操作符
@@ -43,6 +45,26 @@ class RenderGAPI(object):
         self.transfer = TransferOperator(self._connect)  # 传输操作符
         self.config = ConfigOperator(self._connect)  # 配置操作符
         self.mqConnect = MqConnect(auth_key)  # 消息队列连接
+
+    @property
+    def cluster_id(self):
+        """
+        当前 API 实例使用的集群 ID。
+
+        Returns:
+            str or int: 初始化 RenderGAPI 时传入的 ``cluster_id``。
+        """
+        return self._connect.cluster_id
+
+    @property
+    def proxy(self):
+        """
+        当前 API 实例使用的代理配置。
+
+        Returns:
+            dict: 初始化 RenderGAPI 时传入的 ``proxy``，未配置时为空字典。
+        """
+        return self._connect.proxy
 
     def generate_job(self, dcc_file_path, project_name=None, env_name=None):
         """

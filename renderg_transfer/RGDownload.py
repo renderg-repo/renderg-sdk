@@ -18,7 +18,7 @@ class RenderGDownload:
     - **自定义下载**：手动指定服务器路径进行下载（:meth:`custom_download`）。
     """
 
-    def __init__(self, api, job_id, download_path, line, cluster_id, speed=1000, workspace=None, logger=None):
+    def __init__(self, api, job_id, download_path, line, cluster_id, speed=1000, workspace=None, logger=None, proxy=None):
         """
         初始化文件下载实例。
 
@@ -32,6 +32,7 @@ class RenderGDownload:
             speed (int, optional): 传输速度限制（Mbps），默认为 1000。
             workspace (str, optional): 工作目录，用于存放日志文件。默认使用系统用户目录。
             logger (logging.Logger, optional): 日志记录器。默认使用全局 logger。
+            proxy (dict, optional): 定制代理程序配置。未传入时使用 ``api.proxy``。
         """
         if logger is None:
             logger = renderg_utils.get_logger()
@@ -45,7 +46,7 @@ class RenderGDownload:
             self.transfer_config = api.transfer.get_transfer_cluster(cluster_id)[0]
             self.user_id = self.transfer_config.get('username').split('_')[2]
 
-        self.host, self.port = api.transfer.get_transfer_line(line)
+        self.host, self.port = api.transfer.get_transfer_line(line, direction="download")
         self.download_path = download_path
         self.job_id = job_id
         self.speed = speed
@@ -56,8 +57,11 @@ class RenderGDownload:
         renderg_utils.check_path(self.workspace)
         renderg_utils.check_path(self.log_path)
 
+        if proxy is None:
+            proxy = getattr(self.api, "proxy", None)
+
         auth_key = self.api.mqConnect.get_key()
-        self.mqtt_client = MqttClient('{}_{}_sdk'.format(self.user_id, time.time()), auth_key)
+        self.mqtt_client = MqttClient('{}_{}_sdk'.format(self.user_id, time.time()), auth_key, proxy=proxy)
         self.jobEnd_list = []
 
     def mq_callback(self, result):

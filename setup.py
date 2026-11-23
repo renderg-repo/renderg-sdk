@@ -12,7 +12,7 @@ def get_readme():
 
 setup(
     name='renderg_sdk',
-    version='0.1.30',
+    version='0.1.32',
     url='https://github.com/renderg-repo/renderg-sdk.git',
     author='RenderG',
     author_email='support@renderg.com',
@@ -24,7 +24,8 @@ setup(
         'requests',
         'tenacity',
         'paho-mqtt',
-        'typing_extensions'
+        'typing_extensions',
+        'PySocks'
     ],
     package_data={
         'analyze_houdini': ["./houdini/*"],

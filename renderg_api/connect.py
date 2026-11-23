@@ -17,7 +17,7 @@ class Connect(object):
     该类负责处理所有与服务器的HTTP请求，包括认证、请求发送、重试机制和错误处理。
     """
 
-    def __init__(self, auth_key, protocol, domain, cluster_id, header=None):
+    def __init__(self, auth_key, protocol, domain, cluster_id, header=None, proxy=None):
         """
         初始化连接实例。
         
@@ -27,6 +27,17 @@ class Connect(object):
             domain (str): 服务器域名和端口。
             cluster_id (str): 集群ID。
             header (dict, optional): 自定义HTTP请求头。
+            proxy (dict, optional): 定制代理程序配置::
+
+                {
+                    "state": True,
+                    "host": "127.0.0.1",
+                    "api_port": 8899,
+                    "scheme": "http"
+                }
+
+                启用后，SDK 的 HTTP API 请求会通过该代理转发；传输 host/port
+                由 TransferOperator 根据代理的 /config 自动映射。
         """
         self.cluster_id = cluster_id
         self.urls = ApiUrl
@@ -34,12 +45,34 @@ class Connect(object):
         self._auth_key = auth_key
         self.domain = domain
         self._protocol = protocol
+        self.proxy = proxy or {}
+        if self.proxy and not isinstance(self.proxy, dict):
+            raise TypeError('"proxy" must be a dict.')
         if header:
             HEADERS.update(header)
         self._headers = HEADERS
         self._headers["Authorization"] = auth_key
 
         self._session = requests.Session()
+        self._apply_proxy()
+
+    def _apply_proxy(self):
+        if not self.proxy or not self.proxy.get("state"):
+            return
+
+        proxy_host = self.proxy.get("host")
+        proxy_port = self.proxy.get("api_port")
+        if not proxy_host or not proxy_port:
+            raise TypeError(
+                'Required "host"/"api_port" not specified when proxy state is enabled.'
+            )
+
+        scheme = self.proxy.get("scheme") or "http"
+        proxy_url = "{}://{}:{}".format(scheme, proxy_host, proxy_port)
+        self._session.proxies = {
+            "http": proxy_url,
+            "https": proxy_url,
+        }
 
     @property
     def headers(self):

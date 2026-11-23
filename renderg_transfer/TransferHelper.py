@@ -7,6 +7,11 @@ import traceback
 
 import renderg_utils
 
+try:
+    text_type = unicode
+except NameError:
+    text_type = str
+
 
 class TransferConstants:
     """
@@ -57,6 +62,9 @@ class TransferHelper:
         Returns:
             bool: 若为 UNC 路径则返回 ``True``，否则返回 ``False``。
         """
+        if path.startswith("//"):
+            return True
+
         upc_match = re.search(r'/?/?'
                               r'(((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})(\.((2(5[0-5]|[0-4]\d))|[0-1]?\d{1,2})){3})'  # ip
                               r'|'
@@ -124,20 +132,24 @@ class TransferHelper:
 
         flist = [path for pair in zip(source_paths, dest_paths) for path in pair]
         with open(file_path, 'wb') as pf:
-            pf.write('\n'.join(flist).encode('utf-8'))
-            pf.write('\n'.encode('utf-8'))
+            for path in flist:
+                if isinstance(path, text_type):
+                    path = path.encode('utf-8')
+                pf.write(path)
+                pf.write(b'\n')
         return file_path
 
     @classmethod
     def create_ascp_command(cls, cmd_pass, mode, host, port, username,
                             resume_check="2", max_speed=1000, log_dir="", pair_list_file="",
-                            source_path=None, dest_path=None):
+                            source_path=None, dest_path=None, exclude_files_txt=True):
         """
         构建 Aspera ascp 传输命令字符串。
 
         Args:
             cmd_pass (str): 设置 ``ASPERA_SCP_PASS`` 环境变量的命令，例如
-                            ``"set ASPERA_SCP_PASS=xxx"``。
+                            ``"set ASPERA_SCP_PASS=xxx"``。传 ``None`` 时不拼接该前缀，
+                            由调用方通过子进程环境变量传入密码。
             mode (str): 传输模式，``"send"`` 表示上传，``"recv"`` 表示下载。
             host (str): 传输服务器主机地址。
             port (int): 传输服务器端口。
@@ -149,27 +161,32 @@ class TransferHelper:
                                              与 ``source_path``/``dest_path`` 二选一使用。
             source_path (str, optional): 单个源路径（下载时使用）。
             dest_path (str, optional): 单个目标路径（下载时使用）。
+            exclude_files_txt (bool, optional): 是否追加 ``-Efiles.txt`` 排除名为
+                                                ``files.txt`` 的文件，默认为 ``True``。
+                                                资产上传应设为 ``False``。
 
         Returns:
             str: 完整的 ascp 命令字符串，可直接传入 shell 执行。
         """
         ascp_executable = cls.get_ascp_executable()
 
-        cmd = ('{cmd_pass}&& {ascp_dir} -P {port} -O {port} -T -l{speed}m --mode={mode} '
-               '-k{resume_check} --policy=fair --overwrite=diff --user={username} -d --host={host} '
-               '-Efiles.txt').format(
-                username=username, cmd_pass=cmd_pass, ascp_dir=ascp_executable,
-                host=host, port=port, speed=max_speed, mode=mode, resume_check=resume_check)
+        prefix = "{cmd_pass}&& ".format(cmd_pass=cmd_pass) if cmd_pass else ""
+        cmd = (prefix + '"{ascp_dir}" -P {port} -O {port} -T -l{speed}m --mode={mode} '
+               '-k{resume_check} --policy=fair --overwrite=diff --user={username} -d --host={host}').format(
+                ascp_dir=ascp_executable, host=host, port=port, speed=max_speed,
+                mode=mode, resume_check=resume_check, username=username)
+        if exclude_files_txt:
+            cmd += " -Efiles.txt"
         if log_dir:
-            cmd += " -L {log_path}".format(log_path=log_dir)
+            cmd += ' -L "{log_path}"'.format(log_path=log_dir)
 
         if pair_list_file:
-            cmd += " --file-pair-list={file_pair_list_path} .".format(file_pair_list_path=pair_list_file)
+            cmd += ' --file-pair-list="{file_pair_list_path}" .'.format(file_pair_list_path=pair_list_file)
 
         if source_path:
-            cmd += " {source_path}".format(source_path=source_path)
+            cmd += ' "{source_path}"'.format(source_path=source_path)
 
         if dest_path:
-            cmd += " {dest_path}".format(dest_path=dest_path)
+            cmd += ' "{dest_path}"'.format(dest_path=dest_path)
 
         return cmd

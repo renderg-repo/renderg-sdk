@@ -8,13 +8,14 @@ RenderG SDK 是面向 [RenderG 云渲染平台](https://www.renderg.com/) 的 Py
 - **多 DCC 支持**：内置 Maya、Houdini、Clarisse 场景文件分析模块
 - **自动资产收集**：分析场景依赖，生成资产清单（`info.cfg`），确保所有贴图、缓存、代理文件完整上传
 - **高速文件传输**：基于 Aspera 协议的高速上传/下载，支持联通、电信多线路选择
+- **自定义资产上传**：将本地文件/目录直接上传到 RenderG 存储，远端路径按本地目录结构自动生成
 - **完整作业管理**：创建、提交、暂停、恢复、加速、删除渲染作业及帧任务
 - **实时状态监听**：通过 MQTT 订阅作业完成通知，渲染结束后自动下载结果
 
 ## 环境要求
 
 - Python 2 / Python 3
-- 依赖包：`requests`、`tenacity`、`paho-mqtt`、`typing_extensions`
+- 依赖包：`requests`、`tenacity`、`paho-mqtt`、`typing_extensions`、`PySocks`（代理模式需要）
 
 ## 安装
 
@@ -55,6 +56,7 @@ pip install -e .
 | `ENV_ID` | 渲染环境 ID | `api.env.get_env_list()` |
 | `ZONE_ID` | 硬件区域 ID | `api.config.get_zone_list()` |
 | `RAM_LIMIT` | 内存限制 | `64G` / `128G` / `256G` |
+| `PROXY` | 定制代理程序配置（可选） | `{"state": true, "host": "127.0.0.1", "api_port": 8899}` |
 
 ### 2. 初始化 API
 
@@ -74,6 +76,58 @@ set RENDERG_AUTH_KEY=your_auth_key_here
 
 ```python
 api = RenderGAPI(cluster_id=27)  # 自动读取环境变量 RENDERG_AUTH_KEY
+```
+
+---
+
+## 自定义资产上传
+
+如果需要把本地文件或目录直接上传到 RenderG 存储（不创建渲染作业），使用 `RenderGAssetUpload`。
+
+| 本地路径 | 远端路径 |
+|---|---|
+| `D:/Project/tex` | `input/D/Project/tex` |
+| `D:/Project/models/hero.fbx` | `input/D/Project/models/hero.fbx` |
+
+如果使用 RenderG 定制代理程序，在 `config.json` 中增加 `PROXY` 配置，并在初始化 `RenderGAPI` 时传入：
+
+```json
+"PROXY": {
+  "state": true,
+  "host": "127.0.0.1",
+  "api_port": 8899,
+  "scheme": "http"
+}
+```
+
+启用后，SDK 的 API 请求会通过该代理转发；ascp 会连接代理 host
+
+```python
+from renderg_api import RenderGAPI
+from renderg_api.constants import TransferLines
+from renderg_transfer.RGAssetUpload import RenderGAssetUpload
+from renderg_utils import utils, log
+
+config = utils.read_json("./config.json")
+workspace = utils.get_workspace(config.get("WORKSPACE"))
+log.init_logging(log_dir=workspace, console=True)
+
+api = RenderGAPI(
+    auth_key=config["AUTH_KEY"],
+    cluster_id=config["CLUSTER_ID"],
+    proxy=config.get("PROXY"),
+)
+
+uploader = RenderGAssetUpload(
+    api=api,
+    line=TransferLines.LINE_UNICOM,  # 内网 LINE_RENDERG / 联通 LINE_UNICOM / 电信 LINE_TELECOM
+    speed=1000,                      # 限速，单位 Mbps
+    workspace=workspace,
+)
+uploader.upload([
+    "D:/Project/tex",                # 目录：直接写入 pair list，不遍历
+    "D:/Project/models/hero.fbx",    # 文件
+])
 ```
 
 ---
