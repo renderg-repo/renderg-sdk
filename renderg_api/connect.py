@@ -5,7 +5,7 @@ import requests
 from tenacity import retry
 from tenacity import stop_after_attempt, wait_random
 
-from renderg_api.constants import HEADERS
+from renderg_api.constants import HEADERS, PUBLIC_IP_URL, PUBLIC_IP_TIMEOUT
 from renderg_api.exception import RenderGAPIError
 from renderg_api.urls import assemble_api_url, ApiUrl
 
@@ -50,11 +50,13 @@ class Connect(object):
             raise TypeError('"proxy" must be a dict.')
         if header:
             HEADERS.update(header)
-        self._headers = HEADERS
+        # 每个实例持有独立副本，避免多实例（不同用户/公网 IP）互相覆盖
+        self._headers = dict(HEADERS)
         self._headers["Authorization"] = auth_key
 
         self._session = requests.Session()
         self._apply_proxy()
+        self._apply_public_ip()
 
     def _apply_proxy(self):
         if not self.proxy or not self.proxy.get("state"):
@@ -73,6 +75,22 @@ class Connect(object):
             "http": proxy_url,
             "https": proxy_url,
         }
+
+    def _apply_public_ip(self):
+        """初始化时探测出口公网 IP 并写入 X-Real-IP 头；探测失败则不加该头。"""
+        ip = self._fetch_public_ip()
+        if ip:
+            self._headers['X-Real-IP'] = ip
+
+    def _fetch_public_ip(self):
+        """向 PUBLIC_IP_URL 探测出口公网 IP；请求走当前 session（含代理配置）。"""
+        try:
+            response = self._session.get(PUBLIC_IP_URL, timeout=PUBLIC_IP_TIMEOUT)
+            if response.ok:
+                return (response.json() or {}).get('ip', '') or ''
+        except Exception:
+            pass
+        return ''
 
     @property
     def headers(self):

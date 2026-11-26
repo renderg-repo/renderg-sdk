@@ -4,6 +4,9 @@ HEADERS = {
     'Content-Type': 'application/json'
 }
 
+PUBLIC_IP_URL = 'https://www.renderg.com/ipinfo'
+PUBLIC_IP_TIMEOUT = 3
+
 
 class ControlType:
     STOP = 'stop'
